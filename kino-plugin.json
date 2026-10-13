@@ -1,0 +1,202 @@
+{
+  "id": "plaviohd",
+  "name": "PlavioHD",
+  "version": "1.0.0",
+  "apiVersion": 9,
+  "entry": "plugin.js",
+  "icon": "icon.png",
+  "description": "Películas y series en HD (audio en inglés o hindi) y deportes en vivo del addon PlavioHD. Catálogo con TMDB, enlaces del addon.",
+  "author": "xuper-plugin",
+  "homepage": "https://github.com/xuper-plugin/kino-plugin-plaviohd",
+  "hosts": [
+    "plaviohd.vercel.app"
+  ],
+  "capabilities": [
+    "search",
+    "home",
+    "browse",
+    "episodes",
+    "resolve",
+    "download",
+    "channels"
+  ],
+  "streamHosts": "any",
+  "categories": [
+    "movies",
+    "series"
+  ],
+  "color": "#2DD4BF",
+  "section": {
+    "label": "PlavioHD",
+    "labelEn": "PlavioHD"
+  },
+  "theme": {
+    "accent": "#2DD4BF",
+    "onAccent": "#04201C",
+    "background": "#0A0F0E",
+    "surface": "#141C1B",
+    "highlight": "#9FF3E6"
+  },
+  "telemetry": true,
+  "settings": [
+    {
+      "key": "playSection",
+      "type": "section",
+      "label": "Reproducción",
+      "labelEn": "Playback"
+    },
+    {
+      "key": "audio",
+      "type": "select",
+      "label": "Audio preferido",
+      "labelEn": "Preferred audio",
+      "hint": "Casi todo viene en inglés o hindi.",
+      "hintEn": "Almost everything is in English or Hindi.",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Según el idioma de la app",
+          "labelEn": "Follow the app language"
+        },
+        {
+          "value": "es",
+          "label": "Español primero",
+          "labelEn": "Spanish first"
+        },
+        {
+          "value": "en",
+          "label": "Inglés primero",
+          "labelEn": "English first"
+        }
+      ]
+    },
+    {
+      "key": "quality",
+      "type": "select",
+      "label": "Calidad preferida",
+      "labelEn": "Preferred quality",
+      "default": "1080",
+      "options": [
+        {
+          "value": "max",
+          "label": "La más alta (4K)",
+          "labelEn": "Highest (4K)"
+        },
+        {
+          "value": "1080",
+          "label": "Hasta 1080p",
+          "labelEn": "Up to 1080p"
+        },
+        {
+          "value": "720",
+          "label": "Hasta 720p",
+          "labelEn": "Up to 720p"
+        }
+      ]
+    },
+    {
+      "key": "maxSize",
+      "type": "select",
+      "label": "Tamaño máximo del archivo",
+      "labelEn": "Maximum file size",
+      "hint": "Los archivos más pesados pasan al final de la lista.",
+      "hintEn": "Heavier files go to the end of the list.",
+      "default": "10",
+      "options": [
+        {
+          "value": "0",
+          "label": "Sin límite",
+          "labelEn": "No limit"
+        },
+        {
+          "value": "10",
+          "label": "10 GB",
+          "labelEn": "10 GB"
+        },
+        {
+          "value": "5",
+          "label": "5 GB",
+          "labelEn": "5 GB"
+        },
+        {
+          "value": "2.5",
+          "label": "2,5 GB",
+          "labelEn": "2.5 GB"
+        }
+      ]
+    },
+    {
+      "key": "srcSection",
+      "type": "section",
+      "label": "Fuentes y TV",
+      "labelEn": "Sources and TV"
+    },
+    {
+      "key": "sources",
+      "type": "text",
+      "label": "Fuentes de video",
+      "labelEn": "Video sources",
+      "default": "all",
+      "hint": "all, o por comas: HDHub, MovieBox, 9xflix, Vidy, Cinezo, Vidzee, VixSrc",
+      "hintEn": "all, or comma-separated: HDHub, MovieBox, 9xflix, Vidy, Cinezo, Vidzee, VixSrc"
+    },
+    {
+      "key": "regions",
+      "type": "text",
+      "label": "Regiones de TV en vivo",
+      "labelEn": "Live TV regions",
+      "default": "all",
+      "hint": "all, o por comas: US, UK, CA, AU, NZ",
+      "hintEn": "all, or comma-separated: US, UK, CA, AU, NZ"
+    },
+    {
+      "key": "homeSection",
+      "type": "section",
+      "label": "Inicio",
+      "labelEn": "Home"
+    },
+    {
+      "key": "homeRows",
+      "type": "toggle",
+      "label": "Filas en Inicio",
+      "labelEn": "Home rows",
+      "hint": "Tendencias y estrenos aparecen en el Inicio de Kino.",
+      "hintEn": "Trending titles appear on Kino's Home.",
+      "default": true
+    },
+    {
+      "key": "toolsSection",
+      "type": "section",
+      "label": "Herramientas",
+      "labelEn": "Tools"
+    },
+    {
+      "key": "health",
+      "type": "status",
+      "label": "Estado del servicio",
+      "labelEn": "Service status"
+    },
+    {
+      "key": "cache",
+      "type": "status",
+      "label": "Caché",
+      "labelEn": "Cache"
+    },
+    {
+      "key": "probe",
+      "type": "action",
+      "label": "Comprobar servicio",
+      "labelEn": "Check service"
+    },
+    {
+      "key": "clearCache",
+      "type": "action",
+      "label": "Vaciar caché",
+      "labelEn": "Clear cache",
+      "confirm": "¿Vaciar la caché de listas y fichas?",
+      "confirmEn": "Clear the cache of lists and titles?"
+    }
+  ],
+  "liveStreamHosts": "any"
+}
