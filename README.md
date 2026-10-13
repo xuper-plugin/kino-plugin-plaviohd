@@ -17,8 +17,9 @@ En Kino: **Plugins ▸ Agregar un plugin ▸ Kino**, y pega la dirección de est
 - **En vivo**: deportes en vivo, fútbol, críquet y TV deportiva 24/7, con la competición en el título.
 - **Fuentes** del addon: HDHub, MovieBox, 9xflix, Vidy, Cinezo, Vidzee y VixSrc (ajuste **Fuentes de video**). El plugin
   envía al addon su configuración completa; sin ella el addon omite fuentes enteras.
-- **Audio**: español latino primero cuando existe (MovieBox lo etiqueta `esla`), luego español, original e inglés; el
-  hindi y otros idiomas van al final. Se cambia en **Audio preferido**.
+- **Audio**: solo español e inglés. Las copias etiquetadas en otro idioma (hindi, portugués, tamil…) se ocultan; el
+  ajuste **Mostrar otros idiomas** las devuelve. Español latino primero cuando existe (MovieBox lo etiqueta `esla`),
+  luego español, original e inglés. Se cambia en **Audio preferido**.
 - Calidad y tamaño máximo ordenan las copias, no las ocultan; el resto queda en el menú de servidores. Si abres un título
   otra vez poco después porque no cargó, sirve otra copia.
 - **Regiones de TV en vivo**: US, UK, CA, AU, NZ.

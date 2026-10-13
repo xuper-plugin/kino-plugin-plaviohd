@@ -664,7 +664,10 @@ function toStream(s, index) {
   if (Object.keys(headers).length) stream.headers = headers;
   const mime = mimeOf(url);
   if (mime) stream.mime = mime;
-  return { stream, quality: d.quality, gb: d.gb, langRank: d.lang ? (LANG_RANK[d.lang] != null ? LANG_RANK[d.lang] : 3) : d.rawLang ? 5 : 3, tier: tierOf(url), index, key: "h:" + hostOf(url) + ":" + (/\/api\/file\/([\w-]+)/.exec(url) || /\/download\/([\w-]{0,40})/.exec(url) || [])[1] };
+  // A copy whose label names a language other than Spanish or English (Hindi, Portuguese, Tamil...). A dual "Hindi, English"
+  // label reads as English: its first match in LANG_WORDS wins.
+  const other = (!!d.lang && !["langEs", "langLatino", "langEn", "langOriginal"].includes(d.lang)) || !!d.rawLang;
+  return { stream, other, quality: d.quality, gb: d.gb, langRank: d.lang ? (LANG_RANK[d.lang] != null ? LANG_RANK[d.lang] : 3) : d.rawLang ? 5 : 3, tier: tierOf(url), index, key: "h:" + hostOf(url) + ":" + (/\/api\/file\/([\w-]+)/.exec(url) || /\/download\/([\w-]{0,40})/.exec(url) || [])[1] };
 }
 
 // ---- 8b. what failed before -------------------------------------------------------------------------------------
@@ -726,6 +729,7 @@ async function resolveVideo(ref, options) {
   const seen = new Set();
   const pref = String(kino.config.get("quality") || "1080");
   const capGb = parseFloat(String(kino.config.get("maxSize") || "10")) || 0;
+  const showOther = kino.config.get("otherLangs") === true;
   const bad = readBad();
   const servedKey = SERVED_PREFIX + String(ref).slice(0, 120);
   let prev = null;
@@ -743,6 +747,7 @@ async function resolveVideo(ref, options) {
   const heavy = (x) => (capGb > 0 && x.gb > capGb ? 1 : 0);
   const pool = raw
     .map((s, i) => toStream(s, i))
+    .filter((x) => showOther || !x.other)
     .filter((x) => (seen.has(x.stream.url) ? false : (seen.add(x.stream.url), true)))
     .sort(
       (a, b) =>

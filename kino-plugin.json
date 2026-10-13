@@ -1,7 +1,7 @@
 {
   "id": "plaviohd",
   "name": "PlavioHD",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "apiVersion": 9,
   "entry": "plugin.js",
   "icon": "icon.png",
@@ -94,6 +94,15 @@
           "labelEn": "Up to 720p"
         }
       ]
+    },
+    {
+      "key": "otherLangs",
+      "type": "toggle",
+      "label": "Mostrar otros idiomas",
+      "labelEn": "Show other languages",
+      "hint": "Hindi, portugués, tamil… Por defecto solo español e inglés.",
+      "hintEn": "Hindi, Portuguese, Tamil… Spanish and English only by default.",
+      "default": false
     },
     {
       "key": "maxSize",
