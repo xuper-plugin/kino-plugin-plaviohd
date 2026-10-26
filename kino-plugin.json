@@ -1,7 +1,7 @@
 {
   "id": "plaviohd",
   "name": "PlavioHD",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "apiVersion": 9,
   "entry": "plugin.js",
   "icon": "icon.png",
@@ -9,7 +9,7 @@
   "author": "xuper-plugin",
   "homepage": "https://github.com/xuper-plugin/kino-plugin-plaviohd",
   "hosts": [
-    "plaviohd.vercel.app"
+    "hd.plavio.site"
   ],
   "capabilities": [
     "search",

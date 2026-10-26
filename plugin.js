@@ -1,15 +1,15 @@
 // @ts-check
 /// <reference path="./kino.d.ts" />
-// Kino plugin: PlavioHD -- movies, series and live sports from the PlavioHD Stremio addon (plaviohd.vercel.app).
+// Kino plugin: PlavioHD -- movies, series and live sports from the PlavioHD Stremio addon (hd.plavio.site).
 // The addon has no movie or series catalog (it answers streams by IMDb id) and four live-sports catalogs, so:
 //   - movies and series are discovered through Kino's own TMDB (search, shelves, genres) and played by IMDb id;
 //   - the live catalogs are channels in Kino's En vivo tab.
 // Read it top to bottom: 1. constants  2. texts  3. cache  4. addon client  5. items and TMDB  6. search  7. home, browse,
 // section, categories  8. episodes and details  9. resolve (movies, series)  10. live  11. settings.
-// Declared host: plaviohd.vercel.app (kino.fetch). The video is on other servers: the manifest's `streamHosts: "any"` and
+// Declared host: hd.plavio.site (kino.fetch). The video is on other servers: the manifest's `streamHosts: "any"` and
 // `liveStreamHosts: "any"`, which the person approves at install.
 
-const HOST = "plaviohd.vercel.app";
+const HOST = "hd.plavio.site";
 const ROW_MAX = 60;
 const MAX_TMDB_PAGE = 25;
 const IMG = "https://image.tmdb.org/t/p/w342";
