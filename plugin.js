@@ -732,7 +732,7 @@ function makeBrowse({ kino: kino2, loadTab, searchTitles, live = null, tmdbOfImd
 }
 
 // src/plugin.js
-var HOST = "plaviohd.vercel.app";
+var HOST = "hd.plavio.site";
 var ROW_MAX = 60;
 var MAX_TMDB_PAGE = 25;
 var IMG = "https://image.tmdb.org/t/p/w342";

@@ -1,7 +1,7 @@
 # PlavioHD — plugin de Kino
 
 Películas, series y deportes en vivo del addon de Stremio **PlavioHD**
-([plaviohd.vercel.app](https://plaviohd.vercel.app/manifest.json)), en formato nativo de Kino.
+([hd.plavio.site](https://hd.plavio.site/manifest.json)), en formato nativo de Kino.
 
 El addon no trae catálogo de películas ni series (solo responde enlaces por id de IMDb), así que el plugin descubre los
 títulos con el TMDB de Kino (búsqueda, tendencias, géneros) y pide los enlaces al addon cuando reproduces.

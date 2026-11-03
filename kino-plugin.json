@@ -9,7 +9,7 @@
   "author": "xuper-plugin",
   "homepage": "https://github.com/xuper-plugin/kino-plugin-plaviohd",
   "hosts": [
-    "plaviohd.vercel.app"
+    "hd.plavio.site"
   ],
   "capabilities": [
     "search",
