@@ -1,7 +1,7 @@
 {
   "id": "plaviohd",
   "name": "PlavioHD",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "apiVersion": 9,
   "entry": "plugin.js",
   "icon": "icon.png",
@@ -207,5 +207,32 @@
       "confirmEn": "Clear the cache of lists and titles?"
     }
   ],
-  "liveStreamHosts": "any"
+  "liveStreamHosts": "any",
+  "enhancements": {
+    "14": {
+      "capabilities": [
+        "screen"
+      ],
+      "screen": {
+        "label": "PlavioHD",
+        "labelEn": "PlavioHD",
+        "icon": "movie",
+        "menuOpens": "screen",
+        "opensFrom": [
+          "menu",
+          "settings"
+        ],
+        "settingsButton": {
+          "label": "Abrir PlavioHD",
+          "labelEn": "Open PlavioHD"
+        },
+        "settingsIn": "screen"
+      }
+    },
+    "19": {
+      "capabilities": [
+        "screen"
+      ]
+    }
+  }
 }
