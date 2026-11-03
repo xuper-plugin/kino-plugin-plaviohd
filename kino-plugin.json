@@ -8,7 +8,6 @@
   "description": "Películas y series en HD (audio en inglés o hindi) y deportes en vivo del addon PlavioHD. Catálogo con TMDB, enlaces del addon.",
   "author": "xuper-plugin",
   "homepage": "https://github.com/xuper-plugin/kino-plugin-plaviohd",
-  "discoverable": false,
   "hosts": [
     "hd.plavio.site"
   ],
