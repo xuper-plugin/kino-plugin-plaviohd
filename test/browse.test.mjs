@@ -26,13 +26,14 @@ function fakeKino(lang = "es-CO") {
   };
 }
 
-function harness({ device = "phone", lang = "es", kino = fakeKino(), failing = new Set(), searchFails = false } = {}) {
+function harness({ device = "phone", lang = "es", kino = fakeKino(), failing = new Set(), searchFails = false, keptTab = null } = {}) {
   const loaded = [];
   const searched = [];
   const browse = makeBrowse({
     kino,
     live: { categories: async () => [{ id: "live", title: "Ahora" }, { id: "football", title: "Fútbol" }], channels: async (c) => ({ items: [{ id: `ch-${c}`, ref: `plaviohdtv-${c}`, title: `Canal ${c}`, logo: "https://img.test/c.png" }] }), search: async (q) => ({ items: q === "nada" ? [] : [{ id: "ch-x", ref: "plaviohdtv-x", title: "Canal X" }] }) },
     tmdbOfImdb: (i) => (i === "tt0000001" ? 2 : null),
+    keptTab,
     loadTab: async (tab) => { loaded.push(tab); if (failing.has(tab)) throw Object.assign(new Error("down"), { code: "timeout" }); return pageOf(tab); },
     searchTitles: async (q) => { searched.push(q); if (searchFails) throw new Error("down"); return q === "nada" ? [] : [item("movie", 1), item("movie", 2, { adult: true })]; },
   });
@@ -240,4 +241,37 @@ test("the gear opens the settings page (Kino's own form in the same one bar); ba
   const alone = harness();
   alone.push("settings");
   assert.deepEqual(await alone.send("back"), { close: true });
+});
+
+test("a tab copy kept 3 days ago still paints at once (7-day window) and the tick refreshes it", async () => {
+  const kino = fakeKino();
+  const first = harness({ kino });
+  await first.send("open");
+  await first.send("tick", { timer: true });
+  const key = [...kino.store.keys()].find((k) => k.startsWith("browse1:"));
+  const o = JSON.parse(kino.store.get(key));
+  o.at -= 3 * 24 * 3600 * 1000;
+  kino.store.set(key, JSON.stringify(o));
+  const second = harness({ kino });
+  await second.send("open");
+  assert.ok(!types((await second.render()).tree).includes("skeleton"));
+  assert.equal(second.state.pending[0], "inicio", "the old copy is refreshed behind");
+});
+
+test("with no copy of its own a tab paints from the kept shelves, and is still refreshed", async () => {
+  const h = harness({ keptTab: (tab) => pageOf(tab) });
+  await h.send("open");
+  const r = await h.render();
+  assert.deepEqual(r.dropped, []);
+  assert.ok(types(r.tree).includes("titleRail") && !types(r.tree).includes("skeleton"));
+  assert.equal(h.state.pending[0], "inicio");
+  assert.deepEqual(h.loaded, []);
+});
+
+test("a keptTab that throws or is empty falls back to skeletons", async () => {
+  for (const keptTab of [() => { throw new Error("x"); }, () => ({ rows: [] })]) {
+    const h = harness({ keptTab });
+    await h.send("open");
+    assert.ok(types((await h.render()).tree).includes("skeleton"));
+  }
 });

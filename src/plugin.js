@@ -348,6 +348,12 @@ async function shelfPage(type, shelf, page) {
   };
 }
 
+// The row a shelf's first page makes.
+function rowOf(type, shelf, prefixed, info, first) {
+  const name = typeLabel(typeOf(type));
+  return { id: `d-${type}-${shelf}`, title: prefixed ? `${info.title} — ${name}` : info.title, ref: `d:${type}:${shelf}`, items: first.slice(0, ROW_MAX), genre: info.genre };
+}
+
 // A shelf's first page, cached; a shelf nobody could read is null and never takes the other rows with it.
 async function shelfRow(type, shelf, prefixed) {
   const info = shelfInfo(type, shelf);
@@ -356,10 +362,21 @@ async function shelfRow(type, shelf, prefixed) {
     const lang = isSpanish() ? "es" : "en";
     const first = await cached(`shelf2:${type}:${shelf}:${lang}`, FRESH_SHELF_MS, async () => (await shelfPage(type, shelf, 1)).items);
     if (!first.length) return null;
-    const name = typeLabel(typeOf(type));
-    return { id: `d-${type}-${shelf}`, title: prefixed ? `${info.title} — ${name}` : info.title, ref: `d:${type}:${shelf}`, items: first.slice(0, ROW_MAX), genre: info.genre };
+    return rowOf(type, shelf, prefixed, info, first);
   } catch (e) {
     kino.log(`shelf ${type}:${shelf} failed: ` + (e && e.message));
+    return null;
+  }
+}
+
+// The same row from storage alone, however old the kept page is (storage itself drops it at HARD_TTL_MS). No network, never throws.
+function shelfRowKept(type, shelf, prefixed) {
+  try {
+    const info = shelfInfo(type, shelf);
+    if (!info) return null;
+    const hit = cacheRead(`shelf2:${type}:${shelf}:${isSpanish() ? "es" : "en"}`);
+    return hit && Array.isArray(hit.v) && hit.v.length ? rowOf(type, shelf, prefixed, info, hit.v) : null;
+  } catch (_) {
     return null;
   }
 }
@@ -435,18 +452,28 @@ export async function section({ tab }) {
 
 // One tab of the browse screen as a section page: Home is the four mixed shelves, Movies and Series their first eight shelves
 // (the genre shelves beyond them are one tap away in Kino's categories).
-async function tabPage(tab) {
+function tabJobs(tab) {
   const type = tab === "peliculas" ? "movie" : tab === "series" ? "series" : null;
-  const jobs = type === null
-    ? [() => shelfRow("movie", "trend", true), () => shelfRow("series", "trend", true), () => shelfRow("movie", "new", true), () => shelfRow("series", "new", true)]
-    : shelvesOf(type).slice(0, 8).map((shelf) => () => shelfRow(type, shelf, false));
+  return type === null
+    ? [["movie", "trend", true], ["series", "trend", true], ["movie", "new", true], ["series", "new", true]]
+    : shelvesOf(type).slice(0, 8).map((shelf) => [type, shelf, false]);
+}
+
+async function tabPage(tab) {
+  const jobs = tabJobs(tab).map((j) => () => shelfRow(...j));
   return { rows: (await mapLimit(jobs, 4, (job) => job())).filter(Boolean) };
+}
+
+// The tab from the kept shelves only (no network): what the screen draws when it has no copy of its own.
+function tabPageKept(tab) {
+  return { rows: tabJobs(tab).map((j) => shelfRowKept(...j)).filter(Boolean) };
 }
 
 let browseInstance = null;
 const browseScreen = () => (browseInstance ??= makeBrowse({
   kino,
   loadTab: (tab) => tabPage(tab),
+  keptTab: (tab) => tabPageKept(tab),
   searchTitles: (q) => search({ q }),
   live: {
     categories: () => liveCategories(),

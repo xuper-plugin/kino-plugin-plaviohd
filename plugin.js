@@ -426,13 +426,13 @@ function makeMetaCache({ kino: kino2, clock = { now: () => Date.now() } }) {
 // src/browse/index.js
 var TAB_KEY = "browseTab";
 var SNAP_PREFIX = "browse1:";
-var SNAP_TTL_MS = 12 * 3600 * 1e3;
+var SNAP_TTL_MS = 7 * 24 * 3600 * 1e3;
 var SNAP_MAX = 20 * 1024;
 var RECENT_KEY = "recent1";
 var RECENT_MAX = 12;
 var HIST_KEY = "searchHist1";
 var HIST_MAX = 24;
-function makeBrowse({ kino: kino2, loadTab, searchTitles, live = null, tmdbOfImdb = () => null }) {
+function makeBrowse({ kino: kino2, loadTab, keptTab = null, searchTitles, live = null, tmdbOfImdb = () => null }) {
   const meta = makeMetaCache({ kino: kino2 });
   const enrich = (data) => data ? {
     slides: data.slides.map((s) => {
@@ -484,9 +484,17 @@ function makeBrowse({ kino: kino2, loadTab, searchTitles, live = null, tmdbOfImd
     return TAB_IDS.includes(t2) ? t2 : null;
   };
   const remember = (tab) => set(TAB_KEY, tab);
+  function keptSeed(tab) {
+    if (!keptTab) return null;
+    try {
+      return tabOf(keptTab(tab));
+    } catch (_) {
+      return null;
+    }
+  }
   function dataOf(tab) {
     if (memo.has(tab)) return memo.get(tab).data;
-    const snap = readSnap(tab);
+    const snap = readSnap(tab) || keptSeed(tab);
     if (snap) {
       memo.set(tab, { data: snap, whole: false });
       return snap;
@@ -1062,6 +1070,10 @@ async function shelfPage(type, shelf, page) {
     more: Number(body && body.total_pages) > page && page < MAX_TMDB_PAGE
   };
 }
+function rowOf(type, shelf, prefixed, info, first) {
+  const name = typeLabel(typeOf(type));
+  return { id: `d-${type}-${shelf}`, title: prefixed ? `${info.title} \u2014 ${name}` : info.title, ref: `d:${type}:${shelf}`, items: first.slice(0, ROW_MAX), genre: info.genre };
+}
 async function shelfRow(type, shelf, prefixed) {
   const info = shelfInfo(type, shelf);
   if (!info || !hasTmdb()) return null;
@@ -1069,10 +1081,19 @@ async function shelfRow(type, shelf, prefixed) {
     const lang = isSpanish() ? "es" : "en";
     const first = await cached(`shelf2:${type}:${shelf}:${lang}`, FRESH_SHELF_MS, async () => (await shelfPage(type, shelf, 1)).items);
     if (!first.length) return null;
-    const name = typeLabel(typeOf(type));
-    return { id: `d-${type}-${shelf}`, title: prefixed ? `${info.title} \u2014 ${name}` : info.title, ref: `d:${type}:${shelf}`, items: first.slice(0, ROW_MAX), genre: info.genre };
+    return rowOf(type, shelf, prefixed, info, first);
   } catch (e) {
     kino.log(`shelf ${type}:${shelf} failed: ` + (e && e.message));
+    return null;
+  }
+}
+function shelfRowKept(type, shelf, prefixed) {
+  try {
+    const info = shelfInfo(type, shelf);
+    if (!info) return null;
+    const hit = cacheRead(`shelf2:${type}:${shelf}:${isSpanish() ? "es" : "en"}`);
+    return hit && Array.isArray(hit.v) && hit.v.length ? rowOf(type, shelf, prefixed, info, hit.v) : null;
+  } catch (_) {
     return null;
   }
 }
@@ -1130,15 +1151,22 @@ async function section({ tab }) {
   }
   return answer;
 }
-async function tabPage(tab) {
+function tabJobs(tab) {
   const type = tab === "peliculas" ? "movie" : tab === "series" ? "series" : null;
-  const jobs = type === null ? [() => shelfRow("movie", "trend", true), () => shelfRow("series", "trend", true), () => shelfRow("movie", "new", true), () => shelfRow("series", "new", true)] : shelvesOf(type).slice(0, 8).map((shelf) => () => shelfRow(type, shelf, false));
+  return type === null ? [["movie", "trend", true], ["series", "trend", true], ["movie", "new", true], ["series", "new", true]] : shelvesOf(type).slice(0, 8).map((shelf) => [type, shelf, false]);
+}
+async function tabPage(tab) {
+  const jobs = tabJobs(tab).map((j) => () => shelfRow(...j));
   return { rows: (await mapLimit(jobs, 4, (job) => job())).filter(Boolean) };
+}
+function tabPageKept(tab) {
+  return { rows: tabJobs(tab).map((j) => shelfRowKept(...j)).filter(Boolean) };
 }
 var browseInstance = null;
 var browseScreen = () => browseInstance ?? (browseInstance = makeBrowse({
   kino,
   loadTab: (tab) => tabPage(tab),
+  keptTab: (tab) => tabPageKept(tab),
   searchTitles: (q) => search({ q }),
   live: {
     categories: () => liveCategories(),

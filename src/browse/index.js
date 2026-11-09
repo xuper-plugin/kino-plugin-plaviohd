@@ -14,7 +14,8 @@ import { makeMetaCache } from "./metaCache.js";
 
 const TAB_KEY = "browseTab";
 const SNAP_PREFIX = "browse1:";
-const SNAP_TTL_MS = 12 * 3600 * 1000;
+// A kept copy older than this is not drawn. Any kept copy is drawn (never skeletons) and the next tick refreshes it: `whole` stays false.
+const SNAP_TTL_MS = 7 * 24 * 3600 * 1000;
 const SNAP_MAX = 20 * 1024;
 const RECENT_KEY = "recent1";
 const RECENT_MAX = 12;
@@ -22,10 +23,10 @@ const HIST_KEY = "searchHist1";
 const HIST_MAX = 24;
 
 /**
- * `kino`: the host; `loadTab(tab)` → the section page of that tab (`{ rows }`); `searchTitles(q)` → the cards a search finds;
+ * `kino`: the host; `loadTab(tab)` → the section page of that tab (`{ rows }`); `keptTab(tab)` → the same page from the kept shelves only (no network); `searchTitles(q)` → the cards a search finds;
  * `live`: `{ categories(), channels(categoryId), search(q) }` for the live page; `tmdbOfImdb(imdb)` → the TMDB id a series was met with.
  */
-export function makeBrowse({ kino, loadTab, searchTitles, live = null, tmdbOfImdb = () => null }) {
+export function makeBrowse({ kino, loadTab, keptTab = null, searchTitles, live = null, tmdbOfImdb = () => null }) {
   const meta = makeMetaCache({ kino });
   /** [data] with what the meta cache knows: the cards' TMDB ids and the slides' title logos. */
   const enrich = (data) => (data ? {
@@ -57,10 +58,16 @@ export function makeBrowse({ kino, loadTab, searchTitles, live = null, tmdbOfImd
   const stored = () => { const t = get(TAB_KEY); return TAB_IDS.includes(t) ? t : null; };
   const remember = (tab) => set(TAB_KEY, tab);
 
+  /** With no copy of its own, a tab is drawn from the catalog's kept shelves (even expired ones; no network). */
+  function keptSeed(tab) {
+    if (!keptTab) return null;
+    try { return tabOf(keptTab(tab)); } catch (_) { return null; }
+  }
+
   /** [tab]'s data for drawing: this sandbox's, else its kept copy (not "whole": the next tick refreshes it). */
   function dataOf(tab) {
     if (memo.has(tab)) return memo.get(tab).data;
-    const snap = readSnap(tab);
+    const snap = readSnap(tab) || keptSeed(tab);
     if (snap) { memo.set(tab, { data: snap, whole: false }); return snap; }
     return null;
   }
