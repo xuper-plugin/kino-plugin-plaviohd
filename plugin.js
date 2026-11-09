@@ -875,6 +875,7 @@ var FRESH_META_MS = 60 * 60 * 1e3;
 var FRESH_ART_MS = 12 * 60 * 60 * 1e3;
 var FRESH_IMDB_MS = 7 * 24 * 60 * 60 * 1e3;
 var FRESH_LIVE_MS = 60 * 1e3;
+var FRESH_MANIFEST_MS = 30 * 60 * 1e3;
 function cacheKeys() {
   return kino.storage.keys().filter((k) => k.startsWith(CACHE_PREFIX));
 }
@@ -1510,17 +1511,33 @@ function channelOf(m, categoryId) {
     logo: [m.logo, m.poster].find((u) => typeof u === "string" && u.startsWith("https://"))
   };
 }
+async function declaredLive() {
+  try {
+    const m = await cached("manifest", FRESH_MANIFEST_MS, () => getJson("/manifest.json", 1e4));
+    const ids = new Set((Array.isArray(m && m.catalogs) ? m.catalogs : []).map((c) => c && c.id));
+    return LIVE.filter((c) => ids.has(c.catalog));
+  } catch (e) {
+    kino.log("live manifest not read: " + (e && e.message));
+    return LIVE;
+  }
+}
 async function liveCatalog(cat) {
   return cached("live:" + cat.id, FRESH_LIVE_MS, async () => {
-    const body = await getJson(`/catalog/tv/${cat.catalog}.json`, 12e3);
+    let body;
+    try {
+      body = await getJson(`/catalog/tv/${cat.catalog}.json`, 12e3);
+    } catch (e) {
+      if (/answered 404/.test(String(e && e.message || ""))) return [];
+      throw e;
+    }
     return (Array.isArray(body.metas) ? body.metas : []).filter((m) => m && typeof m.id === "string" && LIVE_ID.test(m.id)).map((m) => ({ id: m.id, name: m.name, logo: m.logo, poster: m.poster }));
   });
 }
 async function liveCategories() {
-  return LIVE.map((c) => ({ id: c.id, title: t(c.title), genre: "deportes" }));
+  return (await declaredLive()).map((c) => ({ id: c.id, title: t(c.title), genre: "deportes" }));
 }
 async function liveChannels({ categoryId, cursor }) {
-  const cat = LIVE.find((c) => c.id === categoryId);
+  const cat = (await declaredLive()).find((c) => c.id === categoryId);
   if (!cat) return { items: [] };
   const metas = await liveCatalog(cat);
   const from = cursor ? Math.max(0, parseInt(cursor, 10) || 0) : 0;
@@ -1530,7 +1547,7 @@ async function liveChannels({ categoryId, cursor }) {
 async function liveSearch({ query }) {
   const q = String(query || "").trim().toLowerCase();
   if (!q) return { items: [] };
-  const lists = await mapLimit(LIVE, 2, async (c) => {
+  const lists = await mapLimit(await declaredLive(), 2, async (c) => {
     try {
       return [c, await liveCatalog(c)];
     } catch {

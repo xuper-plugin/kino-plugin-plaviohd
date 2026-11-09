@@ -14,7 +14,7 @@ En Kino: **Plugins ▸ Agregar un plugin ▸ Kino**, y pega la dirección de est
 
 - **Sección PlavioHD** con Inicio, Películas y Series: tendencias, en cartelera, populares, mejor valoradas y géneros.
 - **Búsqueda** de películas y series, y fichas con episodios.
-- **En vivo**: deportes en vivo, fútbol, críquet y TV deportiva 24/7, con la competición en el título.
+- **En vivo**: deportes en vivo, fútbol, críquet y TV deportiva 24/7, con la competición en el título. Solo aparecen los catálogos que el addon declara en su manifiesto; desde finales de octubre no declara ninguno, así que la pestaña queda vacía hasta que vuelva.
 - **Fuentes** del addon: HDHub, MovieBox, 9xflix, Vidy, Cinezo, Vidzee y VixSrc (ajuste **Fuentes de video**). El plugin
   envía al addon su configuración completa; sin ella el addon omite fuentes enteras.
 - **Audio**: solo español e inglés. Las copias etiquetadas en otro idioma (hindi, portugués, tamil…) se ocultan; el
